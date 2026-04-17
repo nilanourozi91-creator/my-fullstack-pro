@@ -14,14 +14,20 @@ class prodectResourse extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-           'name'=>$this->name,
-           'stock'=>$this->stock,
-           'price'=>$this->price,
-           'brand'=>$this->prodect->brand,
-           'description'=>$this->prodectD->description,
-           'addcatagorys'=>$this->prodectD->addcatagorys,
-           'img_url'=>$this->imgall->img_url,           
+         return [
+            'id' => $this->id,
+
+            'name' => $this->name,
+            'stock' => $this->stock,
+            'price' => $this->price,
+
+            // FIX: correct relationship
+            'brand' => $this->prodectD?->brand,
+            'description' => $this->prodectD?->description,
+            'categories' => $this->prodectD?->addcatagorys,
+
+            // FIX: collection of images
+            'images' => $this->imgall?->pluck('img_url'),
         ];
     }
 }

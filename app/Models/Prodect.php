@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Prodect extends Model
 {
+     protected $fillable = [
+        'name',
+        'price',
+        'stock',
+    ];
     public function prodectD() {
         return $this->hasOne(ProdectDelallis::class,'pro_id');
     }

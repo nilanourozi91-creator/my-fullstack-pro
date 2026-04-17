@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\prodectrequest;
+use App\Http\Requests\updeteprodectRequest;
+use App\Http\Resources\ProdectResource;
 use App\Http\Resources\prodectResourse;
+use App\Http\Resources\ProductResource;
 use App\Models\allimges;
 use App\Models\Prodect;
 use App\Models\ProdectDelallis;
@@ -12,6 +15,11 @@ use Illuminate\Http\Request;
 
 class prodectcontroller extends Controller
 {
+        protected $fillable=[
+           'name',
+           'price',
+           'stock',
+        ];
     /**
      * Display a listing of the resource.
      */
@@ -26,38 +34,38 @@ class prodectcontroller extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(prodectrequest $request)
-    {
-         $pro= new Prodect();
-        $pro->created(
-          [
-            'name'=>$request->name,
-            'price'=>$request->price,
-            'stock'=>$request->stock,
-          ]
-        );
-         $pro->save();
-       $prodectd= new ProdectDelallis();
-       $prodectd->created([
-           'brand'=>$request->brand,
-           'addcatagorys'=>$request->addcatagorys,
-           'description'=>$request->dsc,
-           'prodect_id'=>$pro->id,
-       ]);
-    //    $prodectd->save();
-      $path=null;
-      if ($request->hasFile('images')) {
-        $path=$request->file('images')->store('public','prodect-img');
+   public function store(Request $request)
+{
+    $pro = Prodect::create([
+        'name' => $request->name,
+        'price' => $request->price,
+        'stock' => $request->stock,
+    ]);
 
-        $img= new allimges();
-      $img->create([
-        'img_url'=>$path,
-        'imegeable_id'=>$pro->id,
-        'imegeable_type'=>Prodect::class,
-      ]);
-     $img->save();
+    // Create product details
+    ProdectDelallis::create([
+        'brand' => $request->brand,
+        'addcatagorys' => $request->addcatagorys,
+        'description' => $request->description,
+        'pro_id' => $pro->id,
+    ]);
+
+    // Upload image
+    if ($request->hasFile('images')) {
+        $path = $request->file('images')->store('prodect-img', 'public');
+
+        allimges::create([
+            'img_url' => $path,
+            'imegeable_id' => $pro->id,
+            'imegeable_type' => Prodect::class,
+        ]);
     }
-    }
+
+    return response()->json([
+        'message' => 'Product created successfully',
+        'product_id' => $pro->id
+    ]);
+}
     /**
      * Display the specified resource.
      */
@@ -65,17 +73,23 @@ class prodectcontroller extends Controller
     {
        $showbooks= Prodect::findOrFail($id);
        return new prodectResourse($showbooks);
-      // return response()->json([
-      //   'data'=>$showbooks
-      // ]);
+      
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(updeteprodectRequest $request, string $id)
     {
-        //
+           $proall= Prodect::findOrFail($id)->get();
+           $proall->update([
+            'name'=>$request->name,
+            'price'=>$request->price,
+            'stock'=>$request->stock,
+           ]);
+           $proall->save();
+
+         $prodectDetills=ProdectDelallis::where('pro_id',$pro_id)->frist();
     }
 
     /**

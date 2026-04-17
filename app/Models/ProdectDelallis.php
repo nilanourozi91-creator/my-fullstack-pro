@@ -7,14 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class ProdectDelallis extends Model
 {
    protected $fillable = [
-    'name',
-    'slag',
-    'images',
+    
+  
     'brand',
-    'stock',
-    'price',
-    'rating',
-    'numRiveow',
+    'addcatagorys',
     'description',
     'pro_id',
    ];

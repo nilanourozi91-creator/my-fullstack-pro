@@ -12,6 +12,7 @@ use App\Models\Prodect;
 use App\Models\ProdectDelallis;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class prodectcontroller extends Controller
 {
@@ -51,6 +52,8 @@ class prodectcontroller extends Controller
     ]);
 
     // Upload image
+    $imgurl1=null;
+    $imgurl2=null;
     if ($request->hasFile('images')) {
         $path = $request->file('images')->store('prodect-img', 'public');
 
@@ -69,11 +72,21 @@ class prodectcontroller extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    // public function show(string $id)
+    // {
+    //    $showbooks= Prodect::FindOrFail($id)->with(['imgall','prodectD'])->get();
+    //    return response()->json([
+    //     'data'=>$showbooks,
+    //      'masssege'=>'data get it secssfully'
+    //    ]);
+    // }
+
+      public function show( Prodect $prodect)
     {
-       $showbooks= Prodect::findOrFail($id);
-       return new prodectResourse($showbooks);
-      
+       $prodect->load('imgall','prodectD');
+        return response()->json([
+            'data'=>$prodect
+        ]);
     }
 
     /**
@@ -81,15 +94,51 @@ class prodectcontroller extends Controller
      */
     public function update(updeteprodectRequest $request, string $id)
     {
-           $proall= Prodect::findOrFail($id)->get();
-           $proall->update([
-            'name'=>$request->name,
-            'price'=>$request->price,
-            'stock'=>$request->stock,
-           ]);
-           $proall->save();
+         try {
+            $request->validate([
+                'name'=>'nullable|string|min:3',
+                'stock'=>'nullable|string|min:3',
+                'price'=>'nullable|numeric|min:20',
+                'addcatagorys'=>'nullable|string|min:3',
+                'brand'=>'nullable|string|min:3',
+                'desecription'=>'nullable|string|min:4',
+                'img1'=>'nullable|image|mimes:jpg,jpag,png,gif,webp',
+                'img2'=>'nullable|image|mimes:jpg,jpag,png,gif,webp',
+            ]);
+            $prodect=Prodect::findOrfail($id);
+            $prodect->update([
+              'name'=>$request->name,
+              'stock'=>$request->stock,
+              'price'=>$request->price,
+            ]);
+               $prodect->ProdectDelallis->update([
+                  'brand'=>$request->brand,
+                  'desecription'=>$request->desecription,
+                  ' addcatagorys'=>$request->addcatagorys,
+               ]);
+               $imgpath1=null;
+               $imgpath2=null;
+               if ($request->hasFile('img1')&& $request->hasFile('img2')) {
+                 $imgpath1=$request->file('img1')->store('prodect_img','public');
+                 $imgpath1=$request->file('img2')->store('prodect_img','public');
+                 foreach ($prodect as $imgall => $img) {
+                    if (Storage::disk('public')->exists($img->img_url)) {
+                        Storage::disk('public')->delete($img->img_url);
+                    }
+                 }
+                 $prodect->allimges()->delete();
+                 $prodect->imgall()->createMany([
+                       ['img_url'=>$imgpath1],
+                       ['img_url'=>$imgpath2],
+                 ]);
+               }
+                 $prodect->load('prodectD',' imgall');
+                 return new prodectResourse($prodect);
 
-         $prodectDetills=ProdectDelallis::where('pro_id',$pro_id)->frist();
+         } catch (\Throwable $th) {
+            //throw $th;
+         }
+        
     }
 
     /**
@@ -97,6 +146,20 @@ class prodectcontroller extends Controller
      */
     public function destroy(string $id)
     {
-        //
+       $pro=Prodect::findOrFail($id);
+    //    $pro->load('prodectD',' imgall');
+       $pro->delete();
+       $pro->ProdectDelallis()->delete();
+       foreach ($pro->imgall as $img) {
+        if(storage::disk('public')->exists($img->img_url)){
+          Storage::disk('public')->delete($img->img_url);
+        }
+       
+       }    
+        $pro->imgall()->delete();
+        return response()->json([
+            'data'=>$pro,
+            'massege'=>'prodeactdeleted secssafuly'
+        ]);
     }
 }

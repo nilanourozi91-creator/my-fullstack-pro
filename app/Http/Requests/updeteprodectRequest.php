@@ -30,7 +30,7 @@ class updeteprodectRequest extends FormRequest
             'addcatagorys'=>'nullable|string',
             'brand'=>'nullable|string',
             'img_url'=>'nullable|string',
-            'imegeable_type'=>'required|file|mimes:png,jpg,gif,webpt',
+            'imegeable_type'=>'required|file|mimes:png,jpg,jpag,gif,webp',
             'imegeable_id'=>'required|integer',
         ];
     }

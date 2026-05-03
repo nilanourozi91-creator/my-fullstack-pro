@@ -28,6 +28,8 @@ class prodectrequest extends FormRequest
             'brand'=>'required|string',
             'stock'=>'required|integer',
             'addcatagorys'=>'required|string',
+            'img1'=>'required|image|mimes:png,jpg,jpg,jpag,gif',
+            'img2'=>'required|image|mimes:png,jpg,jpag,gif',
         ];
     }
 }

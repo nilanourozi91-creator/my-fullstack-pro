@@ -14,7 +14,7 @@ class Prodect extends Model
     public function prodectD() {
         return $this->hasOne(ProdectDelallis::class,'pro_id');
     }
-     public function imgall(){
+     public function img(){
         return $this->morphMany(allimges::class,'imegeable');
     }
     public function user(){

@@ -20,55 +20,61 @@ class prodectcontroller extends Controller
            'name',
            'price',
            'stock',
+           'img_url',
+
+        
         ];
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-      $allpro= Prodect::with('prodectD','imgall')->get();
-        return response()->json([
-           'data'=>$allpro
-        ]);
+      
+       $allprodect=Prodect::with(['img','prodectD'])->get();
+       return response()->json([
+        'data'=>$allprodect
+        
+       ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
+   public function store(prodectrequest $request)
+     {
+      public function store(prodectrequest $request)
 {
-    $pro = Prodect::create([
-        'name' => $request->name,
-        'price' => $request->price,
-        'stock' => $request->stock,
+    $prodect = Prodect::create([
+        'name'=>$request->name,
+        'price'=>$request->price,
+        'stock'=>$request->stock,
     ]);
 
-    // Create product details
-    ProdectDelallis::create([
-        'brand' => $request->brand,
-        'addcatagorys' => $request->addcatagorys,
-        'description' => $request->description,
-        'pro_id' => $pro->id,
+    $prodect->prodectD()->create([
+        'description'=>$request->description,
+        'brand'=>$request->brand,
+        'addcatagorys'=>$request->addcatagorys,
     ]);
 
-    // Upload image
-    $imgurl1=null;
-    $imgurl2=null;
-    if ($request->hasFile('images')) {
-        $path = $request->file('images')->store('prodect-img', 'public');
+    $images = [];
 
-        allimges::create([
-            'img_url' => $path,
-            'imegeable_id' => $pro->id,
-            'imegeable_type' => Prodect::class,
-        ]);
+    if ($request->hasFile('img1')) {
+        $images[] = ['img_url' => $request->file('img1')->store('prodect_img','public')];
+    }
+
+    if ($request->hasFile('img2')) {
+        $images[] = ['img_url' => $request->file('img2')->store('prodect_img','public')];
+    }
+
+    if (!empty($images)) {
+        $prodect->imgall()->createMany($images);
     }
 
     return response()->json([
-        'message' => 'Product created successfully',
-        'product_id' => $pro->id
+        'data'=>$prodect->load('prodectD','imgall')
     ]);
 }
+     }
     /**
      * Display the specified resource.
      */
@@ -83,7 +89,7 @@ class prodectcontroller extends Controller
 
       public function show( Prodect $prodect)
     {
-       $prodect->load('imgall','prodectD');
+       $prodect->load(['imgall','prodectD']);
         return response()->json([
             'data'=>$prodect
         ]);
@@ -120,14 +126,14 @@ class prodectcontroller extends Controller
                $imgpath2=null;
                if ($request->hasFile('img1')&& $request->hasFile('img2')) {
                  $imgpath1=$request->file('img1')->store('prodect_img','public');
-                 $imgpath1=$request->file('img2')->store('prodect_img','public');
+                 $imgpath1=$request->file('img1')->store('prodect_img','public');
                  foreach ($prodect as $imgall => $img) {
                     if (Storage::disk('public')->exists($img->img_url)) {
                         Storage::disk('public')->delete($img->img_url);
                     }
                  }
                  $prodect->allimges()->delete();
-                 $prodect->imgall()->createMany([
+                 $prodect->imgall()->create([
                        ['img_url'=>$imgpath1],
                        ['img_url'=>$imgpath2],
                  ]);

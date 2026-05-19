@@ -21,27 +21,24 @@ class prodectcontroller extends Controller
            'price',
            'stock',
            'img_url',
-
         
         ];
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-      
-       $allprodect=Prodect::with(['img','prodectD'])->get();
-       return response()->json([
-        'data'=>$allprodect
-        
-       ]);
-    }
+  public function index()
+{
+    $allprodect = Prodect::with('prodectD', 'imgall','reivew')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
+    return response()->json([
+        'data' => $allprodect
+    ]);
+}
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage.  
      */
-   public function store(prodectrequest $request)
-     {
       public function store(prodectrequest $request)
 {
     $prodect = Prodect::create([
@@ -74,19 +71,9 @@ class prodectcontroller extends Controller
         'data'=>$prodect->load('prodectD','imgall')
     ]);
 }
-     }
     /**
      * Display the specified resource.
      */
-    // public function show(string $id)
-    // {
-    //    $showbooks= Prodect::FindOrFail($id)->with(['imgall','prodectD'])->get();
-    //    return response()->json([
-    //     'data'=>$showbooks,
-    //      'masssege'=>'data get it secssfully'
-    //    ]);
-    // }
-
       public function show( Prodect $prodect)
     {
        $prodect->load(['imgall','prodectD']);

@@ -27,7 +27,8 @@ class prodectResourse extends JsonResource
             'categories' => $this->prodectD?->addcatagorys,
 
             // FIX: collection of images
-            'images' => $this->imgall?->pluck('img_url'),
+            'img1' => $this->imgall?->pluck('img_url'),
+            // 'im' => $this->imgall?->pluck('img_url'),
         ];
     }
 }

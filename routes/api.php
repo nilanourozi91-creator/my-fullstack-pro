@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\allimge;
+use App\Http\Controllers\authcontroller;
 use App\Http\Controllers\imgeController;
 use App\Http\Controllers\prodectcontroller;
 use App\Http\Controllers\reviewController;
@@ -14,3 +15,4 @@ Route::get('/user', function (Request $request) {
 route::apiResource('prodect',prodectcontroller::class);
 route::apiResource('img',allimge::class);
 route::apiResource('review',reviewController::class);
+route::apiResource('user',authcontroller::class);

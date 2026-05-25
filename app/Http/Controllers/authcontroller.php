@@ -11,12 +11,20 @@ class authcontroller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user=User::all();
-        return response()->json([
-            'data'=>$user
+        $request->validate([
+          'name'=>'required|string|min:3',
+          'email'=>'required|string|min:4',
         ]);
+        $users=User::all();
+        foreach ($users as $user) {
+            if ($user->email==$request->email && Hash::check($request->password,$request->password)) {
+                return response()->json([
+                    'data'=>'the user matches to user'.$user->name,
+                ]);
+            }
+        }
     }
 
     /**
@@ -24,20 +32,29 @@ class authcontroller extends Controller
      */
     public function store(Request $request)
     {
-       $makeUser= User::create([
-          'name'=>$request->name,
-          'email'=>$request->email,
-           'password'=>Hash::make($request->password),
+         $request->validate([
+          'name'=>'required|string|min:3',
+          'email'=>'required|string|min:4',
         ]);
+       $user= User::where('email',$request->email)->first();
+       if ($user && Hash::check($request->password,$user->password)) {
+         $user->createToken('auth_token')->plainText;
+          return response()->json([
+            'data'=>$user->Token,
+       ]);
+       }
+       else{
         return response()->json([
-          'data'=>$makeUser
+            'data'=>'something went worng',
         ]);
+       }
+      
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id) 
     {
         $singleUser=User::findOrfail($id);
         return response()->json([

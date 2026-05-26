@@ -13,18 +13,35 @@ class authcontroller extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-          'name'=>'required|string|min:3',
-          'email'=>'required|string|min:4',
-        ]);
-        $users=User::all();
-        foreach ($users as $user) {
-            if ($user->email==$request->email && Hash::check($request->password,$request->password)) {
-                return response()->json([
-                    'data'=>'the user matches to user'.$user->name,
-                ]);
-            }
-        }
+        // $request->validate([
+        //   'email'=>'required|string|min:3',
+        //   'password'=>'required|string|min:4',
+        // ]);
+        // $founduser=User::all();
+        // foreach ($founduser as $newuser) {
+        //     if ($newuser->email==$request->email && Hash::check($request->password,$newuser->password)) {
+        //         return response()->json([
+        //             'data'=>'the user matches to user'.$newuser->name,
+        //         ]);
+        //     }
+        //     else{
+        //         return response()->json([
+        //             'data'=>'the user not matches to user.....'.$newuser->name,
+        //         ]);
+        //     }
+        // }
+        $user = User::where('email', $request->email)->first();
+
+if ($user && Hash::check($request->password, $user->password)) {
+
+    return response()->json([
+        'data' => 'the user matches to user ' . $user->name,
+    ]);
+}
+
+return response()->json([
+    'data' => 'User not found',
+], 404);
     }
 
     /**
@@ -32,22 +49,25 @@ class authcontroller extends Controller
      */
     public function store(Request $request)
     {
-         $request->validate([
-          'name'=>'required|string|min:3',
-          'email'=>'required|string|min:4',
+            $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:4',
         ]);
-       $user= User::where('email',$request->email)->first();
-       if ($user && Hash::check($request->password,$user->password)) {
-         $user->createToken('auth_token')->plainText;
-          return response()->json([
-            'data'=>$user->Token,
-       ]);
-       }
-       else{
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
-            'data'=>'something went worng',
+            'token' => $token,
+            'user' => $user,
         ]);
-       }
       
     }
 
@@ -56,9 +76,9 @@ class authcontroller extends Controller
      */
     public function show(string $id) 
     {
-        $singleUser=User::findOrfail($id);
+        $singleUser = User::findOrFail($id);
         return response()->json([
-            'data'=>$singleUser
+            'data' => $singleUser
         ]);
     }
 
@@ -67,10 +87,12 @@ class authcontroller extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $updateuser=User::findOrFail($id);
-        $updateuser->update($request->all());
+        $updateUser = User::findOrFail($id);
+
+        $updateUser->update($request->all());
+
         return response()->json([
-            'data'=>$updateuser
+            'data' => $updateUser
         ]);
     }
 
@@ -79,10 +101,12 @@ class authcontroller extends Controller
      */
     public function destroy(string $id)
     {
-       $deleteuser=User::findOrfail($id);
-       $deleteuser->delete();
-       return response()->json([
-         'massege'=>$deleteuser.'deleted'
-       ]);
+        $deleteUser = User::findOrFail($id);
+
+        $deleteUser->delete();
+
+        return response()->json([
+            'message' => 'User deleted successfully'
+        ]);
     }
 }

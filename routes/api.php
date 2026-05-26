@@ -15,4 +15,4 @@ Route::get('/user', function (Request $request) {
 route::apiResource('prodect',prodectcontroller::class);
 route::apiResource('img',allimge::class);
 route::apiResource('review',reviewController::class);
-route::apiResource('user',authcontroller::class);
+route::apiResource('/Auth',authcontroller::class);

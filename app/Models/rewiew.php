@@ -9,7 +9,8 @@ class rewiew extends Model
     protected $fillable = [
         'user_id',
         'prodect_id',
-        'rating'
+        'rating',
+        'comment',
     ];
      public function prodect(){
         return $this->belongsTo(Prodect::class,'prodect_id');

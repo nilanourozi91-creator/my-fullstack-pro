@@ -10,7 +10,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\allimges;
 use App\Models\Prodect;
 use App\Models\ProdectDelallis;
-use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -31,11 +31,17 @@ class prodectcontroller extends Controller
     $allprodect = Prodect::with('prodectD', 'imgall','reivew')
         ->orderBy('created_at', 'desc')
         ->paginate(10);
-
+ 
     return response()->json([
-        'data' => $allprodect
+        'data' => $allprodect 
     ]);
 }
+      public function GetAllProdect(){
+      $pro=  Prodect::with(['prodectD', 'imgall'])->paginate(10);
+        return response()->json([
+         'prodects'=>$pro
+        ]);
+      }
     /**
      * Store a newly created resource in storage.  
      */
@@ -154,5 +160,19 @@ class prodectcontroller extends Controller
             'data'=>$pro,
             'massege'=>'prodeactdeleted secssafuly'
         ]);
+    }
+
+     public function getlatestprodect(){
+       $all =Prodect::where('created_at','<=',Carbon::now()->subDays(30))->OrWhere('created_at','=>',Carbon::now()->subDays(60))->count();
+         return response()->json([
+            'data'=>$all
+         ]);      
+    }
+    // get all user
+    public function CurrentProdect(){
+       $all =Prodect::where('created_at','<=',now())->OrWhere('created_at','>=',Carbon::now()->subDays(30))->count();
+         return response()->json([
+            'data'=>$all
+         ]);      
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\reviewRequsts;
 use App\Http\Resources\reviewResoures;
 use App\Models\rewiew;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class reviewController extends Controller
@@ -14,12 +15,19 @@ class reviewController extends Controller
      */
     public function index()
     {
-        $allrevewies=rewiew::all();
+      
+        try {
+            $all=rewiew::all()->count();
         return response()->json([
-            'data'=>$allrevewies->load(['prodect','user'])
+            'data'=>$all,
         ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'data'=>'not have review'
+                ]);
+        }
     }
-
+      
     /**
      * Store a newly created resource in storage.
      */
@@ -64,6 +72,18 @@ class reviewController extends Controller
 
         return response()->json([
             'message' => 'Review deleted successfully'
+        ]);
+    }
+    public function GetCurrentReview(){
+       $allreview= rewiew::where('created_at','>=',now())->OrWhere('created_at','<=',Carbon::now()->subDays(30))->count();
+        return response()->json([
+            'data'=>$allreview
+        ]);
+    }
+    public function GetlatestReview(){
+       $allreview= rewiew::where('created_at','<=',Carbon::now()->subDays(30))->OrWhere('created_at','>=',Carbon::now()->subDays(60))->count();
+        return response()->json([
+            'data'=>$allreview
         ]);
     }
 }
